@@ -21,7 +21,7 @@ import java.io.OutputStream;
 /*
 * @作者:Hugh
 * @时间:2020/1/4 17:13
-* @作用:长截图+保存到相册+水印
+* @作用:截图+保存到相册+水印
 */
 
 public class ViewBitmap {
@@ -29,12 +29,15 @@ public class ViewBitmap {
     private Context context;
     private String loge;
     private String path;
+    private Paint paint;
+    private Canvas canvas;
+    private Bitmap bitmap;
 
-    public static ViewBitmap getInstance(Context context, String loge, String path) {
+    public static ViewBitmap getInstance(Context context, String loge, String path,Paint paint) {
         if (viewBitmap == null) {
             synchronized (ViewBitmap.class) {
                 if (viewBitmap == null) {
-                    viewBitmap = new ViewBitmap(context,loge,path);
+                    viewBitmap = new ViewBitmap(context,loge,path,paint);
                 }
             }
         }
@@ -42,30 +45,54 @@ public class ViewBitmap {
 
     }
 
-    public ViewBitmap(Context context, String loge, String path) {
+    public ViewBitmap(Context context, String loge, String path,Paint paint) {
         this.context = context;
         this.loge = loge;
         this.path = path;
+        this.paint = paint;
+        if (paint == null){
+
+        }
     }
 
     /**
      * 截取View的屏幕
      **/
-    public boolean getViewBitmap(View view) {
+    public boolean getViewBitmap(View view,int style) {
         boolean result;
-        Bitmap bitmap;
         // 创建对应大小的bitmap
         bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_4444);
-        final Canvas canvas = new Canvas(bitmap);
+        canvas = new Canvas(bitmap);
         //获取当前主题背景颜色，设置canvas背景
         canvas.drawColor(Color.parseColor("#ffffff"));
         view.draw(canvas);
-        result = drawTextToBitmap(context, canvas, view.getMeasuredWidth(), view.getMeasuredHeight(),bitmap);
+        result = setStyle(view,style);
+        return result;
+    }
+
+    private boolean setStyle(View view,int style){
+        boolean result = false;
+        switch (style){
+            case 0:
+                result = drawTextToBitmap(context, canvas, view.getMeasuredWidth(), view.getMeasuredHeight(),bitmap);
+                break;
+            case 1:
+                result = drawTextToBitmap(context, canvas, view.getMeasuredWidth(), view.getMeasuredHeight(),bitmap,paint);
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            case 4:
+                break;
+            case 5:
+                break;
+        }
         return result;
     }
 
     /**
-     * 给图片添加水印
+     * 给图片添加水印 样式1
      *
      * @param context
      * @param canvas  画布
@@ -110,9 +137,45 @@ public class ViewBitmap {
         }
     }
 
-    private static int sp2px(Context context, float spValue) {
+    public static int sp2px(Context context, float spValue) {
         final float fontScale = context.getResources().getDisplayMetrics().scaledDensity;
         return (int) (spValue * fontScale + 0.5f);
+    }
+
+    /**
+     * 给图片添加水印 样式2
+     *
+     * @param context
+     * @param canvas  画布
+     * @param width   宽
+     * @param height  高
+     */
+    private boolean drawTextToBitmap(Context context, Canvas canvas, int width, int height,Bitmap bitmap,Paint paint) {
+        //保存当前画布状态
+        canvas.save();
+        //画布旋转-30度
+        canvas.rotate(-30);
+        //获取要添加文字的宽度
+        float textWidth = paint.measureText(loge);
+        int index = 0;
+        //行循环，从高度为0开始，向下每隔80dp开始绘制文字
+        for (int positionY = -sp2px(context, 30); positionY <= height; positionY += sp2px(context, 80)) {
+            //设置每行文字开始绘制的位置,0.58是根据角度算出tan30°,后面的(index++ % 2) * textWidth是为了展示效果交错绘制
+            float fromX = -0.58f * height + (index++ % 2) * textWidth;
+            //列循环，从每行的开始位置开始，向右每隔2倍宽度的距离开始绘制（文字间距1倍宽度）
+            for (float positionX = fromX; positionX < width; positionX += textWidth * 2) {
+                //绘制文字
+                canvas.drawText(loge, positionX, positionY, paint);
+            }
+        }
+        //恢复画布状态
+        canvas.restore();
+        //Android 10 保存方法与Andriud 10以下版本不一样,所以需要判断
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+            return saveBmp2GalleryQ(bitmap);
+        }else {
+            return saveBmp2Gallery(bitmap);
+        }
     }
 
     /**

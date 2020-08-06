@@ -89,10 +89,10 @@ public class ViewBitmap {
     private boolean setStyle(View view,int style){
         boolean result = false;
         switch (style){
-            case 0:
+            case ViewBitmapStyle.CHANGE_DEFAULT:
                 result = drawTextToBitmap2(context, canvas, view.getMeasuredWidth(), view.getMeasuredHeight(),bitmap);
                 break;
-            case 1:
+            case ViewBitmapStyle.CENTER:
                 result = drawSingleBitmap(canvas,view.getMeasuredWidth(),view.getMeasuredHeight(),bitmap);
                 break;
             case 2:

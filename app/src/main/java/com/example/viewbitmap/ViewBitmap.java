@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -70,14 +71,29 @@ public class ViewBitmap {
         return result;
     }
 
+    /**
+     * 截取View的屏幕(默认样式)
+     **/
+    public boolean getViewBitmap(View view) {
+        boolean result;
+        // 创建对应大小的bitmap
+        bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_4444);
+        canvas = new Canvas(bitmap);
+        //获取当前主题背景颜色，设置canvas背景
+        canvas.drawColor(Color.parseColor("#ffffff"));
+        view.draw(canvas);
+        result = drawTextToBitmap(context, canvas, view.getMeasuredWidth(), view.getMeasuredHeight(),bitmap);
+        return result;
+    }
+
     private boolean setStyle(View view,int style){
         boolean result = false;
         switch (style){
             case 0:
-                result = drawTextToBitmap(context, canvas, view.getMeasuredWidth(), view.getMeasuredHeight(),bitmap);
+                result = drawTextToBitmap2(context, canvas, view.getMeasuredWidth(), view.getMeasuredHeight(),bitmap);
                 break;
             case 1:
-                result = drawTextToBitmap(context, canvas, view.getMeasuredWidth(), view.getMeasuredHeight(),bitmap,paint);
+                result = drawSingleBitmap(canvas,view.getMeasuredWidth(),view.getMeasuredHeight(),bitmap);
                 break;
             case 2:
                 break;
@@ -150,7 +166,7 @@ public class ViewBitmap {
      * @param width   宽
      * @param height  高
      */
-    private boolean drawTextToBitmap(Context context, Canvas canvas, int width, int height,Bitmap bitmap,Paint paint) {
+    private boolean drawTextToBitmap2(Context context, Canvas canvas, int width, int height,Bitmap bitmap) {
         //保存当前画布状态
         canvas.save();
         //画布旋转-30度
@@ -170,6 +186,31 @@ public class ViewBitmap {
         }
         //恢复画布状态
         canvas.restore();
+        //Android 10 保存方法与Andriud 10以下版本不一样,所以需要判断
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+            return saveBmp2GalleryQ(bitmap);
+        }else {
+            return saveBmp2Gallery(bitmap);
+        }
+    }
+
+    /**
+     * 给图片添加水印 样式3
+     * @param canvas
+     * @param width
+     * @param height
+     * @param bitmap
+     * @return
+     */
+    private boolean drawSingleBitmap(Canvas canvas, int width, int height,Bitmap bitmap){
+        //保存当前画布状态
+        canvas.save();
+        //获取要添加文字的宽度
+        Rect rect = new Rect();
+        paint.getTextBounds(loge,0,loge.length(),rect);
+        int textWidth = rect.width();
+        //绘制文字
+        canvas.drawText(loge, width/2-textWidth/2, height/2, paint);
         //Android 10 保存方法与Andriud 10以下版本不一样,所以需要判断
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
             return saveBmp2GalleryQ(bitmap);

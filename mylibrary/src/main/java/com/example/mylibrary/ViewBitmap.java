@@ -184,6 +184,8 @@ public class ViewBitmap {
         int textWidth = rect.width();
         //绘制文字
         canvas.drawText(loge, width/2-textWidth/2, height/2, paint);
+        //恢复画布状态
+        canvas.restore();
         //Android 10 保存方法与Andriud 10以下版本不一样,所以需要判断
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
             return saveBmp2GalleryQ(bitmap);
@@ -210,6 +212,8 @@ public class ViewBitmap {
         int textWidth = rect.width();
         //绘制文字
         canvas.drawText(loge, 100, 200, paint);
+        //恢复画布状态
+        canvas.restore();
         //Android 10 保存方法与Andriud 10以下版本不一样,所以需要判断
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
             return saveBmp2GalleryQ(bitmap);
@@ -236,6 +240,8 @@ public class ViewBitmap {
         int textWidth = rect.width();
         //绘制文字
         canvas.drawText(loge, 100, height-200, paint);
+        //恢复画布状态
+        canvas.restore();
         //Android 10 保存方法与Andriud 10以下版本不一样,所以需要判断
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
             return saveBmp2GalleryQ(bitmap);
@@ -262,6 +268,8 @@ public class ViewBitmap {
         int textWidth = rect.width();
         //绘制文字
         canvas.drawText(loge, width-textWidth/2-100, 200, paint);
+        //恢复画布状态
+        canvas.restore();
         //Android 10 保存方法与Andriud 10以下版本不一样,所以需要判断
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
             return saveBmp2GalleryQ(bitmap);
@@ -290,6 +298,8 @@ public class ViewBitmap {
         int textWidth = rect.width();
         //绘制文字
         canvas.drawText(loge, width-textWidth/2-100, height-200, paint);
+        //恢复画布状态
+        canvas.restore();
         //Android 10 保存方法与Andriud 10以下版本不一样,所以需要判断
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
             return saveBmp2GalleryQ(bitmap);
@@ -317,6 +327,8 @@ public class ViewBitmap {
         int textWidth = rect.width();
         //绘制文字
         canvas.drawText(loge, width/2-textWidth/2, 200, paint);
+        //恢复画布状态
+        canvas.restore();
         //Android 10 保存方法与Andriud 10以下版本不一样,所以需要判断
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
             return saveBmp2GalleryQ(bitmap);
@@ -345,6 +357,8 @@ public class ViewBitmap {
         int textWidth = rect.width();
         //绘制文字
         canvas.drawText(loge, width/2-textWidth/2, height-200, paint);
+        //恢复画布状态
+        canvas.restore();
         //Android 10 保存方法与Andriud 10以下版本不一样,所以需要判断
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
             return saveBmp2GalleryQ(bitmap);

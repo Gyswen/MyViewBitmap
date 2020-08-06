@@ -22,7 +22,7 @@ import java.io.OutputStream;
 /*
 * @作者:Hugh
 * @时间:2020/1/4 17:13
-* @作用:截图+保存到相册+水印
+* @作用:截图+保存到相册(Andriud Q适配)+水印
 */
 
 public class ViewBitmap {

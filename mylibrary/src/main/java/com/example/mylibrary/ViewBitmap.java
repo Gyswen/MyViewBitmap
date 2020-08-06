@@ -59,7 +59,7 @@ public class ViewBitmap {
     /**
      * 截取View的屏幕
      **/
-    public boolean getViewBitmap(View view,int style) {
+    public boolean getViewBitmap(View view,int rotate,int style) {
         boolean result;
         // 创建对应大小的bitmap
         bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_4444);
@@ -67,7 +67,7 @@ public class ViewBitmap {
         //获取当前主题背景颜色，设置canvas背景
         canvas.drawColor(Color.parseColor("#ffffff"));
         view.draw(canvas);
-        result = setStyle(view,style);
+        result = setStyle(view,rotate,style);
         return result;
     }
 
@@ -86,14 +86,14 @@ public class ViewBitmap {
         return result;
     }
 
-    private boolean setStyle(View view,int style){
+    private boolean setStyle(View view,int rotate,int style){
         boolean result = false;
         switch (style){
             case ViewBitmapStyle.CHANGE_DEFAULT:
-                result = drawTextToBitmap2(context, canvas, view.getMeasuredWidth(), view.getMeasuredHeight(),bitmap);
+                result = drawTextToBitmap2(context, canvas,rotate, view.getMeasuredWidth(), view.getMeasuredHeight(),bitmap);
                 break;
             case ViewBitmapStyle.CENTER:
-                result = drawSingleBitmap(canvas,view.getMeasuredWidth(),view.getMeasuredHeight(),bitmap);
+                result = drawSingleBitmap(canvas,rotate,view.getMeasuredWidth(),view.getMeasuredHeight(),bitmap);
                 break;
             case 2:
                 break;
@@ -153,7 +153,7 @@ public class ViewBitmap {
         }
     }
 
-    public static int sp2px(Context context, float spValue) {
+    private static int sp2px(Context context, float spValue) {
         final float fontScale = context.getResources().getDisplayMetrics().scaledDensity;
         return (int) (spValue * fontScale + 0.5f);
     }
@@ -166,11 +166,11 @@ public class ViewBitmap {
      * @param width   宽
      * @param height  高
      */
-    private boolean drawTextToBitmap2(Context context, Canvas canvas, int width, int height,Bitmap bitmap) {
+    private boolean drawTextToBitmap2(Context context, Canvas canvas,int rotate, int width, int height,Bitmap bitmap) {
         //保存当前画布状态
         canvas.save();
         //画布旋转-30度
-        canvas.rotate(-30);
+        canvas.rotate(rotate);
         //获取要添加文字的宽度
         float textWidth = paint.measureText(loge);
         int index = 0;
@@ -202,9 +202,10 @@ public class ViewBitmap {
      * @param bitmap
      * @return
      */
-    private boolean drawSingleBitmap(Canvas canvas, int width, int height,Bitmap bitmap){
+    private boolean drawSingleBitmap(Canvas canvas,int rotate, int width, int height,Bitmap bitmap){
         //保存当前画布状态
         canvas.save();
+        canvas.rotate(rotate);
         //获取要添加文字的宽度
         Rect rect = new Rect();
         paint.getTextBounds(loge,0,loge.length(),rect);

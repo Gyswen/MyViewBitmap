@@ -46,7 +46,7 @@ public class ViewBitmap {
 
     }
 
-    public ViewBitmap(Context context, String loge, String path,Paint paint) {
+    public ViewBitmap(Context context, String loge, String path, Paint paint) {
         this.context = context;
         this.loge = loge;
         this.path = path;
@@ -59,7 +59,7 @@ public class ViewBitmap {
     /**
      * 截取View的屏幕
      **/
-    public boolean getViewBitmap(View view,int style) {
+    public boolean getViewBitmap(View view,int rotate,int style) {
         boolean result;
         // 创建对应大小的bitmap
         bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_4444);
@@ -67,7 +67,7 @@ public class ViewBitmap {
         //获取当前主题背景颜色，设置canvas背景
         canvas.drawColor(Color.parseColor("#ffffff"));
         view.draw(canvas);
-        result = setStyle(view,style);
+        result = setStyle(view,rotate,style);
         return result;
     }
 
@@ -86,29 +86,36 @@ public class ViewBitmap {
         return result;
     }
 
-    private boolean setStyle(View view,int style){
+    private boolean setStyle(View view,int rotate,int style){
         boolean result = false;
-        switch (style){
-            case 0:
-                result = drawTextToBitmap2(context, canvas, view.getMeasuredWidth(), view.getMeasuredHeight(),bitmap);
+        switch (style) {
+            case ViewBitmapStyle.CENTER:
+                result = drawSingleBitmap(canvas, rotate, view.getMeasuredWidth(), view.getMeasuredHeight(), bitmap);
                 break;
-            case 1:
-                result = drawSingleBitmap(canvas,view.getMeasuredWidth(),view.getMeasuredHeight(),bitmap);
+            case ViewBitmapStyle.TOP_LEFT:
+                result = drawTopleftBitmap(canvas, rotate, bitmap);
                 break;
-            case 2:
+            case ViewBitmapStyle.LOWER_LEFT:
+                result = drawLowerleftBitmap(canvas,rotate,view.getMeasuredHeight(),bitmap);
                 break;
-            case 3:
+            case ViewBitmapStyle.TOP_RIGHT:
+                result = drawToprightBitmap(canvas,rotate,view.getMeasuredWidth(),bitmap);
                 break;
-            case 4:
+            case ViewBitmapStyle.LOWER_RIGET:
+                result = drawLowerrightBitmap(canvas,rotate,view.getMeasuredWidth(),view.getMeasuredHeight(),bitmap);
                 break;
-            case 5:
+            case ViewBitmapStyle.TOP_CENTER:
+                result = drawTopcenterBitmap(canvas,rotate,view.getMeasuredWidth(),bitmap);
+                break;
+            case ViewBitmapStyle.LOWER_CENTER:
+                result = drawLowecenterBitmap(canvas,rotate,view.getMeasuredWidth(),view.getMeasuredHeight(),bitmap);
                 break;
         }
         return result;
     }
 
     /**
-     * 给图片添加水印 样式1
+     * 给图片添加水印（默认样式）
      *
      * @param context
      * @param canvas  画布
@@ -159,33 +166,24 @@ public class ViewBitmap {
     }
 
     /**
-     * 给图片添加水印 样式2
-     *
-     * @param context
-     * @param canvas  画布
-     * @param width   宽
-     * @param height  高
+     * 给图片添加水印 样式1(CENTER)
+     * 居中水印
+     * @param canvas
+     * @param width
+     * @param height
+     * @param bitmap
+     * @return
      */
-    private boolean drawTextToBitmap2(Context context, Canvas canvas, int width, int height,Bitmap bitmap) {
+    private boolean drawSingleBitmap(Canvas canvas,int rotate, int width, int height,Bitmap bitmap){
         //保存当前画布状态
         canvas.save();
-        //画布旋转-30度
-        canvas.rotate(-30);
+        canvas.rotate(rotate,width/2,height/2);
         //获取要添加文字的宽度
-        float textWidth = paint.measureText(loge);
-        int index = 0;
-        //行循环，从高度为0开始，向下每隔80dp开始绘制文字
-        for (int positionY = -sp2px(context, 30); positionY <= height; positionY += sp2px(context, 80)) {
-            //设置每行文字开始绘制的位置,0.58是根据角度算出tan30°,后面的(index++ % 2) * textWidth是为了展示效果交错绘制
-            float fromX = -0.58f * height + (index++ % 2) * textWidth;
-            //列循环，从每行的开始位置开始，向右每隔2倍宽度的距离开始绘制（文字间距1倍宽度）
-            for (float positionX = fromX; positionX < width; positionX += textWidth * 2) {
-                //绘制文字
-                canvas.drawText(loge, positionX, positionY, paint);
-            }
-        }
-        //恢复画布状态
-        canvas.restore();
+        Rect rect = new Rect();
+        paint.getTextBounds(loge,0,loge.length(),rect);
+        int textWidth = rect.width();
+        //绘制文字
+        canvas.drawText(loge, width/2-textWidth/2, height/2, paint);
         //Android 10 保存方法与Andriud 10以下版本不一样,所以需要判断
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
             return saveBmp2GalleryQ(bitmap);
@@ -195,22 +193,158 @@ public class ViewBitmap {
     }
 
     /**
-     * 给图片添加水印 样式3
+     *  给图片添加水印 样式2(TOP_LEFT)
+     *  左上角
      * @param canvas
-     * @param width
-     * @param height
+     * @param rotate
      * @param bitmap
      * @return
      */
-    private boolean drawSingleBitmap(Canvas canvas, int width, int height,Bitmap bitmap){
+    private boolean drawTopleftBitmap(Canvas canvas,int rotate, Bitmap bitmap){
         //保存当前画布状态
         canvas.save();
+        canvas.rotate(rotate,100,200);
         //获取要添加文字的宽度
         Rect rect = new Rect();
         paint.getTextBounds(loge,0,loge.length(),rect);
         int textWidth = rect.width();
         //绘制文字
-        canvas.drawText(loge, width/2-textWidth/2, height/2, paint);
+        canvas.drawText(loge, 100, 200, paint);
+        //Android 10 保存方法与Andriud 10以下版本不一样,所以需要判断
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+            return saveBmp2GalleryQ(bitmap);
+        }else {
+            return saveBmp2Gallery(bitmap);
+        }
+    }
+
+    /**
+     * 给图片添加水印 样式3(LOWER_LEFT)
+     * 左下角
+     * @param canvas
+     * @param rotate
+     * @param bitmap
+     * @return
+     */
+    private boolean drawLowerleftBitmap(Canvas canvas,int rotate,int height, Bitmap bitmap){
+        //保存当前画布状态
+        canvas.save();
+        canvas.rotate(rotate,100,height-200);
+        //获取要添加文字的宽度
+        Rect rect = new Rect();
+        paint.getTextBounds(loge,0,loge.length(),rect);
+        int textWidth = rect.width();
+        //绘制文字
+        canvas.drawText(loge, 100, height-200, paint);
+        //Android 10 保存方法与Andriud 10以下版本不一样,所以需要判断
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+            return saveBmp2GalleryQ(bitmap);
+        }else {
+            return saveBmp2Gallery(bitmap);
+        }
+    }
+
+    /**
+     * 给图片添加水印 样式4(TOP_RIGHT)
+     * 右上角
+     * @param canvas
+     * @param rotate
+     * @param bitmap
+     * @return
+     */
+    private boolean drawToprightBitmap(Canvas canvas,int rotate,int width, Bitmap bitmap){
+        //保存当前画布状态
+        canvas.save();
+        canvas.rotate(rotate,width-100,200);
+        //获取要添加文字的宽度
+        Rect rect = new Rect();
+        paint.getTextBounds(loge,0,loge.length(),rect);
+        int textWidth = rect.width();
+        //绘制文字
+        canvas.drawText(loge, width-textWidth/2-100, 200, paint);
+        //Android 10 保存方法与Andriud 10以下版本不一样,所以需要判断
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+            return saveBmp2GalleryQ(bitmap);
+        }else {
+            return saveBmp2Gallery(bitmap);
+        }
+    }
+
+    /**
+     * 给图片添加水印 样式5(LOWER_RIGET)
+     * 右下角
+     * @param canvas
+     * @param rotate
+     * @param width
+     * @param height
+     * @param bitmap
+     * @return
+     */
+    private boolean drawLowerrightBitmap(Canvas canvas,int rotate,int width, int height, Bitmap bitmap){
+        //保存当前画布状态
+        canvas.save();
+        canvas.rotate(rotate,width-100,height-200);
+        //获取要添加文字的宽度
+        Rect rect = new Rect();
+        paint.getTextBounds(loge,0,loge.length(),rect);
+        int textWidth = rect.width();
+        //绘制文字
+        canvas.drawText(loge, width-textWidth/2-100, height-200, paint);
+        //Android 10 保存方法与Andriud 10以下版本不一样,所以需要判断
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+            return saveBmp2GalleryQ(bitmap);
+        }else {
+            return saveBmp2Gallery(bitmap);
+        }
+    }
+
+    /**
+     * 给图片添加水印 样式6(TOP_CENTER)
+     * 中上
+     * @param canvas
+     * @param rotate
+     * @param width
+     * @param bitmap
+     * @return
+     */
+    private boolean drawTopcenterBitmap(Canvas canvas,int rotate,int width, Bitmap bitmap){
+        //保存当前画布状态
+        canvas.save();
+        canvas.rotate(rotate,width/2,200);
+        //获取要添加文字的宽度
+        Rect rect = new Rect();
+        paint.getTextBounds(loge,0,loge.length(),rect);
+        int textWidth = rect.width();
+        //绘制文字
+        canvas.drawText(loge, width/2-textWidth/2, 200, paint);
+        //Android 10 保存方法与Andriud 10以下版本不一样,所以需要判断
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+            return saveBmp2GalleryQ(bitmap);
+        }else {
+            return saveBmp2Gallery(bitmap);
+        }
+    }
+
+    /**
+     *  给图片添加水印 样式7(LOWER_CENTER)
+     *  中下
+     * @param canvas
+     * @param rotate
+     * @param width
+     * @param height
+     * @param bitmap
+     * @return
+     */
+    private boolean drawLowecenterBitmap(Canvas canvas,int rotate,int width, int height, Bitmap bitmap){
+        //保存当前画布状态
+        canvas.save();
+        canvas.rotate(rotate,width/2,height-200);
+        //获取要添加文字的宽度
+        Rect rect = new Rect();
+        paint.getTextBounds(loge,0,loge.length(),rect);
+        int textWidth = rect.width();
+        //绘制文字
+        canvas.drawText(loge, width/2-textWidth/2, height-200, paint);
         //Android 10 保存方法与Andriud 10以下版本不一样,所以需要判断
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
             return saveBmp2GalleryQ(bitmap);
